@@ -1,0 +1,11 @@
+{
+	"token": "",
+	"premium": false,
+	"password": "1234",
+	"active": true,
+	"message": "",
+	"button": null,
+	"link": null,
+	"collect-media": false,
+	"admins": []
+}

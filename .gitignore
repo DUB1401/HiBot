@@ -1,0 +1,10 @@
+# Visual Studio project files.
+HiBot.pyproj
+HiBot.sln
+.vs
+
+# Downloaded attachments.
+Data
+
+# Python cache.
+__pycache__
