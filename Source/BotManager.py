@@ -57,7 +57,7 @@ class BotManager:
 		self.__SaveSettings()
 		
 	# Изменяет текст приветствия.
-	def editMessage(self, Text: str) -> bool:
+	def editMessage(self, Text: str):
 		# Состояние: корректин ли текст.
 		IsCorrected = True
 		# Максимальная длина сообщения.
@@ -94,7 +94,7 @@ class BotManager:
 		return Count
 		
 	# Возвращает словарь параметров бота.
-	def getData(self) -> dict:
+	def getData(self):
 		return self.__Settings.copy()
 
 	# Возвращает тип ожидаемого сообщения.
@@ -102,15 +102,15 @@ class BotManager:
 		return self.__ExpectedType
 	
 	# Возвращает статус бота.
-	def getStatus(self) -> bool:
+	def getStatus(self):
 		return self.__Settings["active"]
 	
 	# Возвращает состояние коллекционирования.
-	def isCollect(self) -> bool:
+	def isCollect(self):
 		return self.__Settings["collect-media"]
 	
 	# Выполняет авторизацию администратора.
-	def login(self, UserID: int, Password: str | None = None) -> bool:
+	def login(self, UserID: int, Password = None):
 		# Состояние: является ли пользователь администратором.
 		IsAdmin = False
 
@@ -175,16 +175,14 @@ class BotManager:
 				Button = types.InlineKeyboardButton(self.__Settings["button"], self.__Settings["link"])
 				Buttons.add(Button)
 
-			# Если сообщение не пустое.
-			if len(self.__Settings["message"]) > 0:
-				# Отправка сообщения: приветствие нового подписчика.
-				self.__Bot.send_message(
-					ChatID,
-					text = self.__Settings["message"],
-					parse_mode = "HTML",
-					disable_web_page_preview = True,
-					reply_markup = Buttons
-				)
+			# Отправка сообщения: приветствие нового подписчика.
+			self.__Bot.send_message(
+				ChatID,
+				text = self.__Settings["message"],
+				parse_mode = "HTML",
+				disable_web_page_preview = True,
+				reply_markup = Buttons
+			)
 			
 	# Задаёт заголовок кнопки.
 	def setButtonHeader(self, Header: str):

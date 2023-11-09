@@ -11,7 +11,7 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory={Application Directory}
-ExecStart=/usr/bin/python3 main.py
+ExecStart=/usr/bin/python3.9 main.py
 Restart=on-failure
 RestartSec=60
 

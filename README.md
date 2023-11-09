@@ -1,13 +1,16 @@
 # HiBot
 **HiBot** – это бот [Telegram](https://telegram.org/), отправляющий приветственные сообщения пользователям, подавшим заявку на вступление в закрытую группу или канал. Он поддерживает стили Telegram, прикрепление вложений и кнопку перехода по ссылке.
 
+> [!WARNING]  
+> В данной ветви представлена версия бота для устаревшего Python 3.9, в связи с чем она не является приоритетной.
+
 ## Порядок установки и использования
 1. Загрузить последний релиз. Распаковать.
-2. Установить Python версии не старше 3.10.
-3. В среду исполнения установить следующие пакеты: [dublib](https://github.com/DUB1401/dublib), [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI?ysclid=loq3f2bmuz181940716).
+2. Установить Python версии 3.9.
+3. В среду исполнения установить следующие пакеты: [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI?ysclid=loq3f2bmuz181940716), [urllib3](https://github.com/urllib3/urllib3).
 ```
-pip install git+https://github.com/DUB1401/dublib
 pip install pyTelegramBotAPI
+pip install urllib3==1.26.6
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
 ```

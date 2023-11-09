@@ -13,7 +13,7 @@ import telebot
 #==========================================================================================#
 
 # Проверка поддержки используемой версии Python.
-CheckPythonMinimalVersion(3, 10)
+CheckPythonMinimalVersion(3, 9)
 # Создание папок в корневой директории.
 MakeRootDirectories(["Data"])
 
@@ -64,7 +64,7 @@ def Command(Message: types.Message):
 		disable_web_page_preview = True,
 		reply_markup = Menu
 	)
-	
+
 # Обработка команды: debug.
 @Bot.message_handler(commands=["debug"])
 def Command(Message: types.Message):
@@ -89,7 +89,7 @@ def Command(Message: types.Message):
 			parse_mode = "MarkdownV2",
 			reply_markup = CreateMenu(BotProcessor)
 		)
-
+	
 # Обработка команды: delbutton.
 @Bot.message_handler(commands=["delbutton"])
 def Command(Message: types.Message):
@@ -130,273 +130,261 @@ def Command(Message: types.Message):
 @Bot.message_handler(content_types=["text"])
 def TextMessage(Message: types.Message):
 	
-	# Реагирование на сообщение по ожидаемому типу.
-	match BotProcessor.getExpectedType():
+	# Тип сообщения – текст приветствия.
+	if BotProcessor.getExpectedType() == ExpectedMessageTypes.Message:
+		# Сохранение нового текста.
+		Result = BotProcessor.editMessage(Message.html_text)
+		# Комментарий.			
+		Comment = "Текст приветственного сообщения изменён\." if Result == True else EscapeCharacters("Сообщение слишком длинное! Telegram устанавливает следующие лимиты:\n\n4096 символов – обычное сообщение;\n2048 символов – сообщение с вложениями (Premium);\n1024 символа – сообщение с вложениями.")
+		# Отправка сообщения: редактирование приветствия завершено.
+		Bot.send_message(
+			Message.chat.id,
+			"✍ *Редактирование приветствия*\n\n" + Comment,
+			parse_mode = "MarkdownV2",
+			disable_web_page_preview = True,
+			reply_markup = CreateMenu(BotProcessor)
+		)
+		# Установка ожидаемого типа сообщения.
+		BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 		
-		# Тип сообщения – текст приветствия.
-		case ExpectedMessageTypes.Message:
-			# Сохранение нового текста.
-			Result = BotProcessor.editMessage(Message.html_text)
-			# Комментарий.			
-			Comment = "Текст приветственного сообщения изменён\." if Result == True else EscapeCharacters("Сообщение слишком длинное! Telegram устанавливает следующие лимиты:\n\n4096 символов – обычное сообщение;\n2048 символов – сообщение с вложениями (Premium);\n1024 символа – сообщение с вложениями.")
-			# Отправка сообщения: редактирование приветствия завершено.
+	# Тип сообщения – заголовок кнопки.
+	if BotProcessor.getExpectedType() ==  ExpectedMessageTypes.Button:
+		# Если нет вложений.
+		if BotProcessor.getAttachmentsCount() == 0:
+			# Изменение заголовка кнопки.
+			BotProcessor.setButtonHeader(Message.text)
+			# Отправка сообщения: изменение заголовка кнопки.
 			Bot.send_message(
 				Message.chat.id,
-				"✍ *Редактирование приветствия*\n\n" + Comment,
+				"🕹️ *Изменение кнопки*\n\nДля кнопки установлен следующий заголовок: _" + EscapeCharacters(Message.text) + "_\.",
 				parse_mode = "MarkdownV2",
 				disable_web_page_preview = True,
 				reply_markup = CreateMenu(BotProcessor)
 			)
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 			
-		# Тип сообщения – заголовок кнопки.
-		case ExpectedMessageTypes.Button:
-			# Если нет вложений.
-			if BotProcessor.getAttachmentsCount() == 0:
+		else:
+			# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
+			Bot.send_message(
+				Message.chat.id,
+				"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
+				parse_mode = "MarkdownV2",
+				disable_web_page_preview = True,
+				reply_markup = CreateMenu(BotProcessor)
+			)
+			
+		# Установка ожидаемого типа сообщения.
+		BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+		
+	# Тип сообщения – заголовок кнопки.
+	if BotProcessor.getExpectedType() ==  ExpectedMessageTypes.Link:
+		
+		# Если нет вложений.
+		if BotProcessor.getAttachmentsCount() == 0:
+
+			# Если строка является URL.
+			if bool(urlparse(Message.text).scheme) == True:
 				# Изменение заголовка кнопки.
-				BotProcessor.setButtonHeader(Message.text)
+				BotProcessor.setButtonLink(Message.text)
 				# Отправка сообщения: изменение заголовка кнопки.
 				Bot.send_message(
 					Message.chat.id,
-					"🕹️ *Изменение кнопки*\n\nДля кнопки установлен следующий заголовок: _" + EscapeCharacters(Message.text) + "_\.",
+					"🕹️ *Изменение кнопки*\n\nДля кнопки установлен следующий URL: _" + EscapeCharacters(Message.text) + "_\.",
 					parse_mode = "MarkdownV2",
 					disable_web_page_preview = True,
 					reply_markup = CreateMenu(BotProcessor)
 				)
 				
 			else:
-				# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
+				# Отправка сообщения: неверный URL.
 				Bot.send_message(
 					Message.chat.id,
-					"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
+					"🕹️ *Изменение кнопки*\n\nНе удалось расспознать ссылку\. Отправьте мне адрес ресурса в формате URL\.",
 					parse_mode = "MarkdownV2",
 					disable_web_page_preview = True,
 					reply_markup = CreateMenu(BotProcessor)
 				)
-				
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 			
-		# Тип сообщения – заголовок кнопки.
-		case ExpectedMessageTypes.Link:
+		else:
+			# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
+			Bot.send_message(
+				Message.chat.id,
+				"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
+				parse_mode = "MarkdownV2",
+				disable_web_page_preview = True,
+				reply_markup = CreateMenu(BotProcessor)
+			)
 			
-			# Если нет вложений.
-			if BotProcessor.getAttachmentsCount() == 0:
+		# Установка ожидаемого типа сообщения.
+		BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+	
+	# Тип сообщения – неопределённый или отключение коллекции.
+	if BotProcessor.getExpectedType() in [ExpectedMessageTypes.Undefined, ExpectedMessageTypes.Image]:
 
-				# Если строка является URL.
-				if bool(urlparse(Message.text).scheme) == True:
-					# Изменение заголовка кнопки.
-					BotProcessor.setButtonLink(Message.text)
-					# Отправка сообщения: изменение заголовка кнопки.
+		# Если пользователь ввёл пароль администратора.
+		if BotProcessor.login(Message.from_user.id) == False and Message.text == Settings["password"]:
+			# Назначение пользователя администратором.
+			BotProcessor.register(Message.from_user.id)
+			# Отправка сообщения: выданы права администратора.
+			Bot.send_message(
+				Message.chat.id,
+				"🔒 Доступ к функциям администрирования: *разрешён*",
+				parse_mode = "MarkdownV2",
+				disable_web_page_preview = True,
+				reply_markup = CreateMenu(BotProcessor)
+			)
+			
+		# Если пользователь уже администратор.
+		if BotProcessor.login(Message.from_user.id) == True:
+	
+			# Редактирование поста.
+			if Message.text == "✍ Редактировать":
+				# Отправка сообщения: редактирование приветствия.
+				Bot.send_message(
+					Message.chat.id,
+					"✍ *Редактирование приветствия*\n\nОтправьте мне текст вашего нового приветствия\.",
+					parse_mode = "MarkdownV2",
+					disable_web_page_preview = True,
+					reply_markup = CreateMenu(BotProcessor)
+				)
+				# Установка ожидаемого типа сообщения.
+				BotProcessor.setExpectedType(ExpectedMessageTypes.Message)
+				
+			# Добавление вложений.
+			if Message.text == "🖼️ Медиа":
+				# Запуск коллекционирования.
+				BotProcessor.collect(True)
+				# Отправка сообщения: добавление вложений.
+				Bot.send_message(
+					Message.chat.id,
+					"🖼️ *Добавление вложений*\n\nОтправляйте мне изображения, которые необходимо прикрепить к приветственному сообщению, или выполните команду /unattach для удаления всех вложений\.",
+					parse_mode = "MarkdownV2",
+					disable_web_page_preview = True,
+					reply_markup = CreateMenu(BotProcessor)
+				)
+				# Установка ожидаемого типа сообщения.
+				BotProcessor.setExpectedType(ExpectedMessageTypes.Image)
+				
+			# Добавление вложений.
+			if Message.text == "🖼️ Медиа (остановить)":
+				# Запуск коллекционирования.
+				BotProcessor.collect(False)
+				# Количество вложений.
+				AttachmentsCount = BotProcessor.getAttachmentsCount()
+				# Отправка сообщения: добавление вложений.
+				Bot.send_message(
+					Message.chat.id,
+					f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
+					parse_mode = "MarkdownV2",
+					disable_web_page_preview = True,
+					reply_markup = CreateMenu(BotProcessor)
+				)
+				# Установка ожидаемого типа сообщения.
+				BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+				
+			# Изменение текста кнопки.
+			if Message.text == "🕹️ Кнопка":
+				
+				# Если нет вложений.
+				if BotProcessor.getAttachmentsCount() == 0:
+					# Отправка сообщения: изменение текста кнопки.
 					Bot.send_message(
 						Message.chat.id,
-						"🕹️ *Изменение кнопки*\n\nДля кнопки установлен следующий URL: _" + EscapeCharacters(Message.text) + "_\.",
+						"🕹️ *Изменение кнопки*\n\nОтправляйте мне название кнопки или выполните команду /delbutton для её отключения\.",
 						parse_mode = "MarkdownV2",
 						disable_web_page_preview = True,
 						reply_markup = CreateMenu(BotProcessor)
 					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Button)
+		
+				else:
+					# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
+					Bot.send_message(
+						Message.chat.id,
+						"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
+						parse_mode = "MarkdownV2",
+						disable_web_page_preview = True,
+						reply_markup = CreateMenu(BotProcessor)
+					)	
+				
+			# Изменение ссылки кнопки.
+			if Message.text == "🔗 URL":
+				
+				# Если нет вложений.
+				if BotProcessor.getAttachmentsCount() == 0:
+					# Отправка сообщения: изменение ссылки кнопки.
+					Bot.send_message(
+						Message.chat.id,
+						"🕹️ *Изменение кнопки*\n\nОтправляйте мне URL для перехода по нажатию кнопки или выполните команду /delbutton для её отключения\.",
+						parse_mode = "MarkdownV2",
+						disable_web_page_preview = True,
+						reply_markup = CreateMenu(BotProcessor)
+					)
+					# Установка ожидаемого типа сообщения.
+					BotProcessor.setExpectedType(ExpectedMessageTypes.Link)
 					
 				else:
-					# Отправка сообщения: неверный URL.
+					# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
 					Bot.send_message(
 						Message.chat.id,
-						"🕹️ *Изменение кнопки*\n\nНе удалось расспознать ссылку\. Отправьте мне адрес ресурса в формате URL\.",
+						"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
 						parse_mode = "MarkdownV2",
 						disable_web_page_preview = True,
 						reply_markup = CreateMenu(BotProcessor)
-					)
+					)	
 				
-			else:
-				# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
+			# Предпросмотр сообщения.
+			if Message.text == "🔍 Предпросмотр":
+				# Отправка сообщения: предпросмотр приветствия.
+				BotProcessor.sendHi(Message.chat.id)
+				
+			# Остановка бота.
+			if Message.text == "🔴 Остановить":
+				# Остановка бота.
+				BotProcessor.disable()
+				# Отправка сообщения: добавление вложений.
 				Bot.send_message(
 					Message.chat.id,
-					"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
+					"📢 *Техническая информация*\n\nРассылка приветственных сообщений остановлена\.",
 					parse_mode = "MarkdownV2",
 					disable_web_page_preview = True,
 					reply_markup = CreateMenu(BotProcessor)
 				)
 				
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-		
-		# Тип сообщения – неопределённый или отключение коллекции.
-		case ExpectedMessageTypes.Undefined | ExpectedMessageTypes.Image:
-	
-			# Если пользователь ввёл пароль администратора.
-			if BotProcessor.login(Message.from_user.id) == False and Message.text == Settings["password"]:
-				# Назначение пользователя администратором.
-				BotProcessor.register(Message.from_user.id)
-				# Отправка сообщения: выданы права администратора.
+			# Возобновление работы бота.
+			if Message.text == "🟢 Возобновить":
+				# Возобновление работы бота.
+				BotProcessor.enable()
+				# Отправка сообщения: добавление вложений.
 				Bot.send_message(
 					Message.chat.id,
-					"🔒 Доступ к функциям администрирования: *разрешён*",
+					"📢 *Техническая информация*\n\nРассылка приветственных сообщений возобновлена\.",
 					parse_mode = "MarkdownV2",
 					disable_web_page_preview = True,
 					reply_markup = CreateMenu(BotProcessor)
 				)
-				
-			# Если пользователь уже администратор.
-			if BotProcessor.login(Message.from_user.id) == True:
-		
-				# Обработка нажатий на кнопки меню.
-				match Message.text:
-		
-					# Редактирование поста.
-					case "✍ Редактировать":
-						# Отправка сообщения: редактирование приветствия.
-						Bot.send_message(
-							Message.chat.id,
-							"✍ *Редактирование приветствия*\n\nОтправьте мне текст вашего нового приветствия\.",
-							parse_mode = "MarkdownV2",
-							disable_web_page_preview = True,
-							reply_markup = CreateMenu(BotProcessor)
-						)
-						# Установка ожидаемого типа сообщения.
-						BotProcessor.setExpectedType(ExpectedMessageTypes.Message)
-						
-					# Добавление вложений.
-					case "🖼️ Медиа":
-						# Запуск коллекционирования.
-						BotProcessor.collect(True)
-						# Отправка сообщения: добавление вложений.
-						Bot.send_message(
-							Message.chat.id,
-							"🖼️ *Добавление вложений*\n\nОтправляйте мне изображения, которые необходимо прикрепить к приветственному сообщению, или выполните команду /unattach для удаления всех вложений\.",
-							parse_mode = "MarkdownV2",
-							disable_web_page_preview = True,
-							reply_markup = CreateMenu(BotProcessor)
-						)
-						# Установка ожидаемого типа сообщения.
-						BotProcessor.setExpectedType(ExpectedMessageTypes.Image)
-						
-					# Добавление вложений.
-					case "🖼️ Медиа (остановить)":
-						# Запуск коллекционирования.
-						BotProcessor.collect(False)
-						# Количество вложений.
-						AttachmentsCount = BotProcessor.getAttachmentsCount()
-						# Отправка сообщения: добавление вложений.
-						Bot.send_message(
-							Message.chat.id,
-							f"🖼️ *Добавление вложений*\n\nКоличество вложений: {AttachmentsCount}\.",
-							parse_mode = "MarkdownV2",
-							disable_web_page_preview = True,
-							reply_markup = CreateMenu(BotProcessor)
-						)
-						# Установка ожидаемого типа сообщения.
-						BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
-						
-					# Изменение текста кнопки.
-					case "🕹️ Кнопка":
-						
-						# Если нет вложений.
-						if BotProcessor.getAttachmentsCount() == 0:
-							# Отправка сообщения: изменение текста кнопки.
-							Bot.send_message(
-								Message.chat.id,
-								"🕹️ *Изменение кнопки*\n\nОтправляйте мне название кнопки или выполните команду /delbutton для её отключения\.",
-								parse_mode = "MarkdownV2",
-								disable_web_page_preview = True,
-								reply_markup = CreateMenu(BotProcessor)
-							)
-							# Установка ожидаемого типа сообщения.
-							BotProcessor.setExpectedType(ExpectedMessageTypes.Button)
-				
-						else:
-							# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
-							Bot.send_message(
-								Message.chat.id,
-								"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
-								parse_mode = "MarkdownV2",
-								disable_web_page_preview = True,
-								reply_markup = CreateMenu(BotProcessor)
-							)	
-						
-					# Изменение ссылки кнопки.
-					case "🔗 URL":
-						
-						# Если нет вложений.
-						if BotProcessor.getAttachmentsCount() == 0:
-							# Отправка сообщения: изменение ссылки кнопки.
-							Bot.send_message(
-								Message.chat.id,
-								"🕹️ *Изменение кнопки*\n\nОтправляйте мне URL для перехода по нажатию кнопки или выполните команду /delbutton для её отключения\.",
-								parse_mode = "MarkdownV2",
-								disable_web_page_preview = True,
-								reply_markup = CreateMenu(BotProcessor)
-							)
-							# Установка ожидаемого типа сообщения.
-							BotProcessor.setExpectedType(ExpectedMessageTypes.Link)
-							
-						else:
-							# Отправка сообщения: нельзя использовать кнопку вместе с вложениями.
-							Bot.send_message(
-								Message.chat.id,
-								"🕹️ *Изменение кнопки*\n\nTelegram не позволяет добавлять кнопку в сообщения с вложениями\.",
-								parse_mode = "MarkdownV2",
-								disable_web_page_preview = True,
-								reply_markup = CreateMenu(BotProcessor)
-							)	
-						
-					# Предпросмотр сообщения.
-					case "🔍 Предпросмотр":
-						# Отправка сообщения: предпросмотр приветствия.
-						BotProcessor.sendHi(Message.chat.id)
-						
-					# Остановка бота.
-					case "🔴 Остановить":
-						# Остановка бота.
-						BotProcessor.disable()
-						# Отправка сообщения: добавление вложений.
-						Bot.send_message(
-							Message.chat.id,
-							"📢 *Техническая информация*\n\nРассылка приветственных сообщений остановлена\.",
-							parse_mode = "MarkdownV2",
-							disable_web_page_preview = True,
-							reply_markup = CreateMenu(BotProcessor)
-						)
-						
-					# Возобновление работы бота.
-					case "🟢 Возобновить":
-						# Возобновление работы бота.
-						BotProcessor.enable()
-						# Отправка сообщения: добавление вложений.
-						Bot.send_message(
-							Message.chat.id,
-							"📢 *Техническая информация*\n\nРассылка приветственных сообщений возобновлена\.",
-							parse_mode = "MarkdownV2",
-							disable_web_page_preview = True,
-							reply_markup = CreateMenu(BotProcessor)
-						)
 						
 # Обработка изображений (со сжатием).					
 @Bot.message_handler(content_types=["photo"])
 def MediaAttachments(Message: types.Message):
-	
-	# Реагирование на сообщение по ожидаемому типу.
-	match BotProcessor.getExpectedType():
-		
-		# Тип сообщения – текст приветствия.
-		case ExpectedMessageTypes.Image:
-			# Сохранение изображения.
-			DownloadImage(Settings["token"], Bot, Message.photo[-1].file_id)
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined) 
+
+	# Тип сообщения – текст приветствия.
+	if BotProcessor.getExpectedType() == ExpectedMessageTypes.Image:
+		# Сохранение изображения.
+		DownloadImage(Settings["token"], Bot, Message.photo[-1].file_id)
+		# Установка ожидаемого типа сообщения.
+		BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined) 
 
 # Обработка изображений (без сжатия).					
 @Bot.message_handler(content_types=["document"])
 def MediaAttachments(Message: types.Message):
-	
-	# Реагирование на сообщение по ожидаемому типу.
-	match BotProcessor.getExpectedType():
 		
-		# Тип сообщения – текст приветствия.
-		case ExpectedMessageTypes.Image:
-			# Сохранение изображения.
-			DownloadImage(Settings["token"], Bot, Message.document.file_id)
-			# Установка ожидаемого типа сообщения.
-			BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
+	# Тип сообщения – текст приветствия.
+	if BotProcessor.getExpectedType() == ExpectedMessageTypes.Image:
+		# Сохранение изображения.
+		DownloadImage(Settings["token"], Bot, Message.document.file_id)
+		# Установка ожидаемого типа сообщения.
+		BotProcessor.setExpectedType(ExpectedMessageTypes.Undefined)
 			
 # Обработка заявок на вступление в канал.
 @Bot.chat_join_request_handler()

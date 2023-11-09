@@ -5,7 +5,7 @@ import requests
 import telebot
 
 # Создаёт разметку меню администратора.
-def CreateMenu(BotProcessor: BotManager) -> types.ReplyKeyboardMarkup:
+def CreateMenu(BotProcessor: BotManager):
 	# Статус коллекционирования.
 	Collect = "" if BotProcessor.getData()["collect-media"] == False else " (остановить)"
 	# Статус бота.
@@ -26,7 +26,7 @@ def CreateMenu(BotProcessor: BotManager) -> types.ReplyKeyboardMarkup:
 	return Menu
 
 # Загружает изображение.
-def DownloadImage(Token: str, Bot: telebot.TeleBot, FileID: int) -> bool:
+def DownloadImage(Token: str, Bot: telebot.TeleBot, FileID: int):
 	# Состояние: успешна ли загрузка.
 	IsSuccess = False
 	# Получение сведений о файле.
@@ -55,7 +55,7 @@ def DownloadImage(Token: str, Bot: telebot.TeleBot, FileID: int) -> bool:
 	return IsSuccess
 
 # Экранирует символы при использовании MarkdownV2 разметки.
-def EscapeCharacters(Post: str) -> str:
+def EscapeCharacters(Post: str):
 	# Список экранируемых символов. _ * [ ] ( ) ~ ` > # + - = | { } . !
 	CharactersList = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 
