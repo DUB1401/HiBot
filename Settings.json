@@ -1,6 +1,7 @@
 {
 	"token": "",
 	"premium": false,
+	"target": null,
 	"password": "1234",
 	"active": true,
 	"message": "",

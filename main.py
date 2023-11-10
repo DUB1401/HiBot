@@ -402,7 +402,9 @@ def MediaAttachments(Message: types.Message):
 @Bot.chat_join_request_handler()
 def ProcessChatJoin(Message: telebot.types.ChatJoinRequest):
 	# Отправка сообщения: приветствия.
-	if BotProcessor.getStatus() == True: BotProcessor.sendHi(Message.from_user.id) 
+	if BotProcessor.getStatus() == True: BotProcessor.sendHi(Message.from_user.id)
+	# Одобрение заявки.
+	if Settings["target"] != None: Bot.approve_chat_join_request(Settings["target"], Message.from_user.id)
 
 # Запуск обработки запросов Telegram.
 Bot.infinity_polling(allowed_updates = telebot.util.update_types)
