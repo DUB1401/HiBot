@@ -4,7 +4,7 @@
 	"target": null,
 	"password": "1234",
 	"active": true,
-	"message": "",
+	"message": "Добро пожаловать!",
 	"button": null,
 	"link": null,
 	"collect-media": false,
