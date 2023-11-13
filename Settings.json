@@ -1,7 +1,7 @@
 {
 	"token": "",
 	"premium": false,
-	"target": null,
+	"auto-approve": false,
 	"password": "1234",
 	"active": true,
 	"message": "Добро пожаловать!",
