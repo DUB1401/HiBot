@@ -404,7 +404,7 @@ def ProcessChatJoin(Message: telebot.types.ChatJoinRequest):
 	# Отправка сообщения: приветствия.
 	if BotProcessor.getStatus() == True: BotProcessor.sendHi(Message.from_user.id)
 	# Одобрение заявки.
-	if Settings["target"] != None: Bot.approve_chat_join_request(Settings["target"], Message.from_user.id)
+	if Settings["auto-approve"] == True: Bot.approve_chat_join_request(Message.chat.id, Message.user_chat_id)
 
 # Запуск обработки запросов Telegram.
 Bot.infinity_polling(allowed_updates = telebot.util.update_types)
