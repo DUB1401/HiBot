@@ -4,6 +4,8 @@
 	"auto-approve": true,
 	"password": "1234",
 	"active": true,
+	"report": null,
+	"use-supervisor": false,
 	"message": "Добро пожаловать!",
 	"button": null,
 	"link": null,

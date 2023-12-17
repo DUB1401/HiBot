@@ -403,8 +403,8 @@ def MediaAttachments(Message: types.Message):
 def ProcessChatJoin(Message: telebot.types.ChatJoinRequest):
 	# Отправка сообщения: приветствия.
 	if BotProcessor.getStatus() == True: BotProcessor.sendHi(Message.from_user.id)
-	# Одобрение заявки.
-	if Settings["auto-approve"] == True: Bot.approve_chat_join_request(Message.chat.id, Message.user_chat_id)
+	# Помещение заявки в очередь на одобрение.
+	if Settings["auto-approve"] == True: BotProcessor.addRequest(Message)
 
 # Запуск обработки запросов Telegram.
 Bot.infinity_polling(allowed_updates = telebot.util.update_types)

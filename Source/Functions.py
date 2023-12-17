@@ -1,11 +1,32 @@
-from Source.BotManager import BotManager
 from telebot import types
 
 import requests
 import telebot
 
+# Формирует текст сообщения об ошибке.
+def CreateExceptionMessage(Type: str, ExceptionData: Exception, Data: dict = dict()) -> str:
+	# Экранирование символов.
+	Type = EscapeCharacters(Type)
+	ExceptionData = EscapeCharacters(str(ExceptionData))
+	# Диагностические сведения.
+	DataList = ""
+	
+	# Для каждого ключа.
+	for Key in Data.keys():
+		# Если нет заголовка, то добавить его.
+		if DataList == "": DataList = "📋 *Данные*\n"
+		# Составить строку.
+		DataList += EscapeCharacters(str(Key)) + ": " + "_" + EscapeCharacters(str(Data[Key])) + "_\n"
+
+	# Текст сообщения об ошибке.
+	Message = f"⚠️ *ОШИБКА*\n\n*Тип:* {Type}\n\n{DataList}\n*Исключение:* {ExceptionData}"
+	# Обрезка сообщения.
+	Message = Message[:2048]
+	
+	return Message
+
 # Создаёт разметку меню администратора.
-def CreateMenu(BotProcessor: BotManager) -> types.ReplyKeyboardMarkup:
+def CreateMenu(BotProcessor: any) -> types.ReplyKeyboardMarkup:
 	# Статус коллекционирования.
 	Collect = "" if BotProcessor.getData()["collect-media"] == False else " (остановить)"
 	# Статус бота.
