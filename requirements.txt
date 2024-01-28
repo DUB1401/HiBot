@@ -1,2 +1,2 @@
-git+https://github.com/DUB1401/dublib
 pyTelegramBotAPI
+dublib

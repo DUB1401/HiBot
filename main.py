@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent
 from urllib.parse import urlparse
 from Source.BotManager import *

@@ -3,8 +3,8 @@ HiBot.pyproj
 HiBot.sln
 .vs
 
-# Downloaded attachments.
-Data
-
 # Python cache.
 __pycache__
+
+# Downloaded attachments.
+Data

@@ -1,5 +1,6 @@
 from Source.Functions import CreateExceptionMessage
-from dublib.Methods import RemoveHTML, WriteJSON
+from dublib.Methods import WriteJSON
+from dublib.Polyglot import HTML
 from threading import Thread
 from telebot import types
 from time import sleep
@@ -149,7 +150,7 @@ class BotManager:
 		if len(os.listdir("Data")) == 0: MaxLength = 4096 
 		
 		# Если сообщение слишком длинное.
-		if len(RemoveHTML(Text)) >= MaxLength:
+		if len(HTML(Text).plain_text) >= MaxLength:
 			# Отключение бота.
 			self.disable()
 			# Переключение состояния.
