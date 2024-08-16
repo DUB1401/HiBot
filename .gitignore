@@ -1,10 +1,10 @@
-# Visual Studio project files.
-HiBot.pyproj
-HiBot.sln
-.vs
+# === REPOSITORY === #
 
-# Python cache.
+# Python virtual enviroment and cache.
 __pycache__
+.venv
 
-# Downloaded attachments.
+# === USER === #
+
+# Users data.
 Data

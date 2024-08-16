@@ -1,2 +1,2 @@
 pyTelegramBotAPI
-dublib
+dublib==0.12.1
